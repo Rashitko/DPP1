@@ -143,18 +143,13 @@ namespace HuffmanskeKapky
             Node pom3;
             Node novy;
             Node lichy = null;
-            int ZbyvaZpracovat = 0;
+            int ZbyvaZpracovat = HuffmanskyLes.Sum(item => item.Value.Count);
             int rank;
-
-            foreach (KeyValuePair<int,List<Node>> item in HuffmanskyLes)
-            {
-                ZbyvaZpracovat += item.Value.Count;
-            }
 
             while (ZbyvaZpracovat != 1)
             {
-                seznam = HuffmanskyLes[HuffmanskyLes.Keys.ElementAt(0)];
-                rank = HuffmanskyLes.Keys.ElementAt(0);
+                rank = HuffmanskyLes.Keys.First();
+                seznam = HuffmanskyLes[rank];
 
                 if (lichy == null)
                 {
@@ -165,7 +160,8 @@ namespace HuffmanskeKapky
 
                         Node left = pom1.WillBeOnLeft(pom3) ? pom1 : pom3;
                         Node right = pom1.WillBeOnLeft(pom3) ? pom3 : pom1;
-                        novy = NodeCreator.CreateNode(left, right, pom1.Freq + pom3.Freq, pom1.Symbol);
+                        int newFreq = pom1.Freq + pom3.Freq;
+                        novy = NodeCreator.CreateNode(left, right, newFreq, pom1.Symbol);
 
                         if (HuffmanskyLes.ContainsKey(novy.Freq))
                         {
@@ -190,12 +186,11 @@ namespace HuffmanskeKapky
                 else 
                 {
                     pom1 = seznam[0];
-                    if (lichy.WillBeOnLeft(pom1))
-                    {
-                        novy = NodeCreator.CreateNode(lichy, pom1, lichy.Freq + pom1.Freq, lichy.Symbol);
-                    }
-                    else novy = NodeCreator.CreateNode(pom1, lichy, pom1.Freq + lichy.Freq, pom1.Symbol);
-
+                    Node left = lichy.WillBeOnLeft(pom1) ? lichy : pom1;
+                    Node right = lichy.WillBeOnLeft(pom1) ? pom1 : lichy;
+                    byte symbol = lichy.WillBeOnLeft(pom1) ? lichy.Symbol : pom1.Symbol;
+                    int newFreq = lichy.Freq + pom1.Freq;
+                    novy = NodeCreator.CreateNode(left, right, newFreq, symbol);
                     if (HuffmanskyLes.ContainsKey(novy.Freq))
                     {
                         HuffmanskyLes[novy.Freq].Add(novy);
@@ -209,9 +204,10 @@ namespace HuffmanskeKapky
                         pom1 = seznam[i];
                         pom3 = seznam[++i];
 
-                        Node left = pom1.WillBeOnLeft(pom3) ? pom1 : pom3;
-                        Node right = pom1.WillBeOnLeft(pom3) ? pom3 : pom1;
-                        novy = NodeCreator.CreateNode(left, right, pom1.Freq + pom3.Freq, pom1.Symbol);
+                        Node left1 = pom1.WillBeOnLeft(pom3) ? pom1 : pom3;
+                        Node right1 = pom1.WillBeOnLeft(pom3) ? pom3 : pom1;
+                        int newFreq1 = pom1.Freq + pom3.Freq;
+                        novy = NodeCreator.CreateNode(left1, right1, newFreq1, pom1.Symbol);
 
                         if (HuffmanskyLes.ContainsKey(novy.Freq))
                         {
@@ -231,6 +227,11 @@ namespace HuffmanskeKapky
             }
             return HuffmanskyLes[HuffmanskyLes.Keys.ElementAt(0)][0];
         }
+
+        // public Node GetAndDelNextNode(SortedDictionary<int, List<Node>> freqToNodes)
+        // {
+
+        // }
        
         public void VypisStrom()
         {
