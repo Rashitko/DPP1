@@ -51,39 +51,6 @@ namespace HuffmanskeKapky
         /// <returns></returns>
         public bool WillBeOnLeft(Node that)
         {
-            // if (that.Freq > this.Freq)
-            // {
-            //     return true;
-            // }
-            // else if (that.Freq < this.Freq)
-            // {
-            //     return false;
-            // }
-            // else if (that.IsLeaf() && !(this.IsLeaf()))
-            // {
-            //     return false;
-            // }
-            // else if (this.IsLeaf() && !(that.IsLeaf()))
-            // {
-            //     return true;
-            // }
-            // else if ((this.IsLeaf()) && (that.IsLeaf()) && (this.Symbol < that.Symbol))
-            // {
-            //     return true;
-            // }
-            // else if ((this.IsLeaf()) && (that.IsLeaf()) && (this.Symbol > that.Symbol))
-            // {
-            //     return false;
-            // }
-            // else if (this.SeqNum < that.SeqNum)
-            // {
-            //     return true;
-            // }
-            // else
-            // {
-            //     return false;
-            // }
-
             if (that.Freq != this.Freq)
             {
                 return that.Freq > this.Freq;
@@ -102,6 +69,17 @@ namespace HuffmanskeKapky
             }
             
             return that.SeqNum > this.SeqNum;
+        }
+
+        public override string ToString()
+        {
+            const string CONTROL_SYMBOL_FORMAT = " [{0}:{1}]\n";
+            const string PRINTABLE_SYMBOL_FORMAT = " ['{0}':{1}]\n";
+            if ( !char.IsControl((char) Symbol))
+            {
+                return string.Format(PRINTABLE_SYMBOL_FORMAT, (char) this.Symbol, this.Freq);
+            }
+            return string.Format(CONTROL_SYMBOL_FORMAT, this.Symbol, this.Freq);
         }
 
 
@@ -136,18 +114,18 @@ namespace HuffmanskeKapky
             root = BuildHuffmanTree(freqToNodes);
         }
 
-        private Node BuildHuffmanTree(SortedDictionary<int, List<Node>> HuffmanskyLes)
+        private Node BuildHuffmanTree(SortedDictionary<int, List<Node>> freqToNodes)
         {
-            int ZbyvaZpracovat = HuffmanskyLes.Sum(item => item.Value.Count);
-            while (ZbyvaZpracovat != 1)
+            int leftNodes = freqToNodes.Sum(item => item.Value.Count);
+            while (leftNodes != 1)
             {
-                Node u = GetAndDelNextNode(HuffmanskyLes);
-                Node v = GetAndDelNextNode(HuffmanskyLes);
+                Node u = GetAndDelNextNode(freqToNodes);
+                Node v = GetAndDelNextNode(freqToNodes);
                 Node father = CreateFather(u, v);
-                AppendToDict(HuffmanskyLes, father);
-                ZbyvaZpracovat--;
+                AppendToDict(freqToNodes, father);
+                leftNodes--;
             }
-            return HuffmanskyLes[HuffmanskyLes.Keys.ElementAt(0)][0];
+            return freqToNodes[freqToNodes.Keys.ElementAt(0)][0];
         }
 
         private void AppendToDict(SortedDictionary<int, List<Node>> freqToNodes, Node u)
@@ -179,49 +157,32 @@ namespace HuffmanskeKapky
             return NodeCreator.CreateNode(left, right, newFreq, symbol);
         }
        
-        public void VypisStrom()
+        public void PrintTree()
         {
-            // VypisStrom(this.root);
-        }
-
-        public void VypisStrom2()
-        {
-            VypisStrom2(this.root, "");
+            PrintTreeWithPrefix(root, "");
         }
         
-        public void VypisStrom2(Node vrch, string pre)
+        private void PrintTreeWithPrefix(Node u, string prefix)
         {
-            bool bylVlevo = false;
+            if (u.IsLeaf()) {
+                Console.Write(u.ToString());
+            } else {
+                const string PADDING = "      ";
+                const string ADDITION_TO_LEFT_PREFIX = "   ";
+                const string ADDITION_TO_RIGHT_PREFIX = "|  ";
+                const string CURRENT_NODE_OUTPUT_FORMAT = "{0,4} -+- ";
+                const string SON_PATH_FORMAT = "{0}|\n";
+                const string NEW_NODE_PREFIX_FORMAT = "{0}`- ";
+                prefix = prefix + PADDING;
 
-            if (vrch.IsLeaf()) {
-                if ((vrch.Symbol >= 32) && (vrch.Symbol <= 0x7E))
-                {
-                    Console.Write(" ['{0}':{1}]\n", (char) vrch.Symbol, vrch.Freq);
-                    return;
-                }
-                else
-                {
-                    Console.Write(" [{0}:{1}]\n", vrch.Symbol, vrch.Freq);
-                }
-                return;
-            }
-            else
-            {
-                // bylVlevo = true;
-            }
-                
-            if (!bylVlevo)
-            {
-                Console.Write("{0,4} -+- ", vrch.Freq);
-                bylVlevo = true;
-            }
-            pre = pre + "      ";
-            if (bylVlevo)
-            {
-                VypisStrom2(vrch.Right, pre + "|  ");
-                Console.Write("{0}|\n", pre);
-                Console.Write("{0}`- ", pre);
-                VypisStrom2(vrch.Left, pre + "   ");
+                Console.Write(CURRENT_NODE_OUTPUT_FORMAT, u.Freq);
+
+                PrintTreeWithPrefix(u.Right, prefix + ADDITION_TO_RIGHT_PREFIX);
+
+                Console.Write(SON_PATH_FORMAT, prefix);
+                Console.Write(NEW_NODE_PREFIX_FORMAT, prefix);
+
+                PrintTreeWithPrefix(u.Left, prefix + ADDITION_TO_LEFT_PREFIX);
             }
         }
     }
@@ -319,11 +280,9 @@ namespace HuffmanskeKapky
     {
         static SortedDictionary<int, List<Node>> Nodey;
         static HuffmanTree Huffman;
-     //   static Stopwatch sw = new Stopwatch();
 
         static void Main(string[] args)
         {
-       //     sw.Start();
 
             if (args.Length != 1)
             {
@@ -336,18 +295,10 @@ namespace HuffmanskeKapky
             if ((Nodey != null) && (Nodey.Count != 0))
             {
                 Huffman = new HuffmanTree(Nodey);
-                Huffman.VypisStrom();
-                //Console.Write("\n");
-                Huffman.VypisStrom2();
+                Huffman.PrintTree();
                 Console.Write("\n");
             }
 
-      /*      sw.Stop();
-            string ExecutionTimeTaken = string.Format("Minutes :{0}\nSeconds :{1}\n Mili seconds :{2}", sw.Elapsed.Minutes, sw.Elapsed.Seconds, sw.Elapsed.TotalMilliseconds);
-            Console.Write(ExecutionTimeTaken);
-            Console.ReadKey();
-
-            Console.ReadKey(); */
         }
     }
 }
