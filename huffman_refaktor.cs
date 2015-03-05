@@ -49,52 +49,71 @@ namespace HuffmanskeKapky
         /// </summary>
         /// <param name="druhy"></param>
         /// <returns></returns>
-        public bool BudeNodeVlevo(Node druhy)
+        public bool WillBeOnTheLeft(Node that)
         {
-            if (druhy.Freq > Freq)
+            // if (that.Freq > this.Freq)
+            // {
+            //     return true;
+            // }
+            // else if (that.Freq < this.Freq)
+            // {
+            //     return false;
+            // }
+            // else if (that.IsLeaf() && !(this.IsLeaf()))
+            // {
+            //     return false;
+            // }
+            // else if (this.IsLeaf() && !(that.IsLeaf()))
+            // {
+            //     return true;
+            // }
+            // else if ((this.IsLeaf()) && (that.IsLeaf()) && (this.Symbol < that.Symbol))
+            // {
+            //     return true;
+            // }
+            // else if ((this.IsLeaf()) && (that.IsLeaf()) && (this.Symbol > that.Symbol))
+            // {
+            //     return false;
+            // }
+            // else if (this.SeqNum < that.SeqNum)
+            // {
+            //     return true;
+            // }
+            // else
+            // {
+            //     return false;
+            // }
+
+            if (that.Freq != this.Freq)
             {
-                return true;
+                return that.Freq > this.Freq;
             }
-            else if (druhy.Freq < Freq)
+            
+            bool exactlyOneLeaf = that.IsLeaf() != this.IsLeaf();
+            if (exactlyOneLeaf)
             {
-                return false;
+                return this.IsLeaf();
             }
-            else if (druhy.IsLeaf() && !(IsLeaf()))
+            
+            bool bothLeafs = that.IsLeaf() && this.IsLeaf();
+            if (bothLeafs)
             {
-                return false;
+                return that.Symbol > this.Symbol;
             }
-            else if (IsLeaf() && !(druhy.IsLeaf()))
-            {
-                return true;
-            }
-            else if ((IsLeaf()) && (druhy.IsLeaf()) && (Symbol < druhy.Symbol))
-            {
-                return true;
-            }
-            else if ((IsLeaf()) && (druhy.IsLeaf()) && (Symbol > druhy.Symbol))
-            {
-                return false;
-            }
-            else if (SeqNum < druhy.SeqNum)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
+            
+            return that.SeqNum > this.SeqNum;
         }
 
 
         #region IComparable Members
 
-        public int CompareTo(Node obj)
+        public int CompareTo(Node that)
         {
-            if (this == obj)
+            if (this == that)
             {
                 return 0;
             }
-            else if (BudeNodeVlevo(obj))
+            else if (this.WillBeOnTheLeft(that))
             {
                 return -1;
             }
@@ -150,7 +169,7 @@ namespace HuffmanskeKapky
                         pom1 = seznam[i];
                         pom3 = seznam[++i];
 
-                        if (pom1.BudeNodeVlevo(pom3))
+                        if (pom1.WillBeOnTheLeft(pom3))
                         {
                             novy = NodeCreator.CreateNode(pom1, pom3, pom1.Freq + pom3.Freq, pom1.Symbol);
                         }
@@ -179,7 +198,7 @@ namespace HuffmanskeKapky
                 else 
                 {
                     pom1 = seznam[0];
-                    if (lichy.BudeNodeVlevo(pom1))
+                    if (lichy.WillBeOnTheLeft(pom1))
                     {
                         novy = NodeCreator.CreateNode(lichy, pom1, lichy.Freq + pom1.Freq, lichy.Symbol);
                     }
@@ -198,7 +217,7 @@ namespace HuffmanskeKapky
                         pom1 = seznam[i];
                         pom3 = seznam[++i];
 
-                        if (pom1.BudeNodeVlevo(pom3))
+                        if (pom1.WillBeOnTheLeft(pom3))
                         {
                             novy = NodeCreator.CreateNode(pom1, pom3, pom1.Freq + pom3.Freq, pom1.Symbol);
                         }
