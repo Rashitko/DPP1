@@ -49,7 +49,7 @@ namespace HuffmanskeKapky
         /// </summary>
         /// <param name="druhy"></param>
         /// <returns></returns>
-        public bool WillBeOnTheLeft(Node that)
+        public bool WillBeOnLeft(Node that)
         {
             // if (that.Freq > this.Freq)
             // {
@@ -113,7 +113,7 @@ namespace HuffmanskeKapky
             {
                 return 0;
             }
-            else if (this.WillBeOnTheLeft(that))
+            else if (this.WillBeOnLeft(that))
             {
                 return -1;
             }
@@ -127,34 +127,28 @@ namespace HuffmanskeKapky
         #endregion
     }
 
-    class strom
+    class HuffmanTree
     {
-        private Node koren;
+        private Node root;
 
-        public strom(SortedDictionary<int, List<Node>> Nodey)
+        public HuffmanTree(SortedDictionary<int, List<Node>> freqToNodes)
         {
-            postavStrom(Nodey);
+            root = BuildHuffmanTree(freqToNodes);
         }
 
-        int pocetStromu = 0;
-
-        private void postavStrom(SortedDictionary<int, List<Node>> HuffmanskyLes)
+        private Node BuildHuffmanTree(SortedDictionary<int, List<Node>> HuffmanskyLes)
         {
             List<Node> seznam;
-                Node pom1;
-                Node pom3;
-                Node novy;
-                Node lichy = null;
-                int ZbyvaZpracovat = 0;
-                int rank;
+            Node pom1;
+            Node pom3;
+            Node novy;
+            Node lichy = null;
+            int ZbyvaZpracovat = 0;
+            int rank;
 
-                foreach (KeyValuePair<int,List<Node>> item in HuffmanskyLes)
-                {
-                    ZbyvaZpracovat += item.Value.Count;
-                }
-
-            if (ZbyvaZpracovat != 1) {
-                pocetStromu = pocetStromu + 1;
+            foreach (KeyValuePair<int,List<Node>> item in HuffmanskyLes)
+            {
+                ZbyvaZpracovat += item.Value.Count;
             }
 
             while (ZbyvaZpracovat != 1)
@@ -169,11 +163,9 @@ namespace HuffmanskeKapky
                         pom1 = seznam[i];
                         pom3 = seznam[++i];
 
-                        if (pom1.WillBeOnTheLeft(pom3))
-                        {
-                            novy = NodeCreator.CreateNode(pom1, pom3, pom1.Freq + pom3.Freq, pom1.Symbol);
-                        }
-                        else novy = NodeCreator.CreateNode(pom3, pom1, pom1.Freq + pom3.Freq, pom1.Symbol);
+                        Node left = pom1.WillBeOnLeft(pom3) ? pom1 : pom3;
+                        Node right = pom1.WillBeOnLeft(pom3) ? pom3 : pom1;
+                        novy = NodeCreator.CreateNode(left, right, pom1.Freq + pom3.Freq, pom1.Symbol);
 
                         if (HuffmanskyLes.ContainsKey(novy.Freq))
                         {
@@ -198,7 +190,7 @@ namespace HuffmanskeKapky
                 else 
                 {
                     pom1 = seznam[0];
-                    if (lichy.WillBeOnTheLeft(pom1))
+                    if (lichy.WillBeOnLeft(pom1))
                     {
                         novy = NodeCreator.CreateNode(lichy, pom1, lichy.Freq + pom1.Freq, lichy.Symbol);
                     }
@@ -217,11 +209,9 @@ namespace HuffmanskeKapky
                         pom1 = seznam[i];
                         pom3 = seznam[++i];
 
-                        if (pom1.WillBeOnTheLeft(pom3))
-                        {
-                            novy = NodeCreator.CreateNode(pom1, pom3, pom1.Freq + pom3.Freq, pom1.Symbol);
-                        }
-                        else novy = NodeCreator.CreateNode(pom3, pom1, pom1.Freq + pom3.Freq, pom1.Symbol);
+                        Node left = pom1.WillBeOnLeft(pom3) ? pom1 : pom3;
+                        Node right = pom1.WillBeOnLeft(pom3) ? pom3 : pom1;
+                        novy = NodeCreator.CreateNode(left, right, pom1.Freq + pom3.Freq, pom1.Symbol);
 
                         if (HuffmanskyLes.ContainsKey(novy.Freq))
                         {
@@ -239,17 +229,17 @@ namespace HuffmanskeKapky
                 }
                 HuffmanskyLes.Remove(rank);
             }
-            koren = HuffmanskyLes[HuffmanskyLes.Keys.ElementAt(0)][0];
+            return HuffmanskyLes[HuffmanskyLes.Keys.ElementAt(0)][0];
         }
        
         public void VypisStrom()
         {
-            // VypisStrom(this.koren);
+            // VypisStrom(this.root);
         }
 
         public void VypisStrom2()
         {
-            VypisStrom2(this.koren, "");
+            VypisStrom2(this.root, "");
         }
         
         public void VypisStrom2(Node vrch, string pre)
@@ -381,7 +371,7 @@ namespace HuffmanskeKapky
     class Program
     {
         static SortedDictionary<int, List<Node>> Nodey;
-        static strom Huffman;
+        static HuffmanTree Huffman;
      //   static Stopwatch sw = new Stopwatch();
 
         static void Main(string[] args)
@@ -398,7 +388,7 @@ namespace HuffmanskeKapky
 
             if ((Nodey != null) && (Nodey.Count != 0))
             {
-                Huffman = new strom(Nodey);
+                Huffman = new HuffmanTree(Nodey);
                 Huffman.VypisStrom();
                 //Console.Write("\n");
                 Huffman.VypisStrom2();
