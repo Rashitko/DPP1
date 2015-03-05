@@ -138,100 +138,46 @@ namespace HuffmanskeKapky
 
         private Node BuildHuffmanTree(SortedDictionary<int, List<Node>> HuffmanskyLes)
         {
-            List<Node> seznam;
-            Node pom1;
-            Node pom3;
-            Node novy;
-            Node lichy = null;
             int ZbyvaZpracovat = HuffmanskyLes.Sum(item => item.Value.Count);
-            int rank;
-
             while (ZbyvaZpracovat != 1)
             {
-                rank = HuffmanskyLes.Keys.First();
-                seznam = HuffmanskyLes[rank];
-
-                if (lichy == null)
-                {
-                    for (int i = 0; i < seznam.Count - 1; i++)
-                    {
-                        pom1 = seznam[i];
-                        pom3 = seznam[++i];
-
-                        Node left = pom1.WillBeOnLeft(pom3) ? pom1 : pom3;
-                        Node right = pom1.WillBeOnLeft(pom3) ? pom3 : pom1;
-                        int newFreq = pom1.Freq + pom3.Freq;
-                        novy = NodeCreator.CreateNode(left, right, newFreq, pom1.Symbol);
-
-                        if (HuffmanskyLes.ContainsKey(novy.Freq))
-                        {
-                            HuffmanskyLes[novy.Freq].Add(novy);
-                        }
-                        else HuffmanskyLes.Add(novy.Freq, new List<Node>() { novy });
-                        
-                        
-                        ZbyvaZpracovat--;
-                    }
-                    if (seznam.Count % 2 == 1)
-                    {
-                        lichy = seznam[seznam.Count - 1];
-
-                    }
-                    else
-                    {
-                        lichy = null;
-                    }
-
-                }
-                else 
-                {
-                    pom1 = seznam[0];
-                    Node left = lichy.WillBeOnLeft(pom1) ? lichy : pom1;
-                    Node right = lichy.WillBeOnLeft(pom1) ? pom1 : lichy;
-                    byte symbol = lichy.WillBeOnLeft(pom1) ? lichy.Symbol : pom1.Symbol;
-                    int newFreq = lichy.Freq + pom1.Freq;
-                    novy = NodeCreator.CreateNode(left, right, newFreq, symbol);
-                    if (HuffmanskyLes.ContainsKey(novy.Freq))
-                    {
-                        HuffmanskyLes[novy.Freq].Add(novy);
-                    }
-                    else HuffmanskyLes.Add(novy.Freq, new List<Node>() { novy });
-
-                    ZbyvaZpracovat--;
-
-                    for (int i = 1; i < seznam.Count - 1; i++)
-                    {
-                        pom1 = seznam[i];
-                        pom3 = seznam[++i];
-
-                        Node left1 = pom1.WillBeOnLeft(pom3) ? pom1 : pom3;
-                        Node right1 = pom1.WillBeOnLeft(pom3) ? pom3 : pom1;
-                        int newFreq1 = pom1.Freq + pom3.Freq;
-                        novy = NodeCreator.CreateNode(left1, right1, newFreq1, pom1.Symbol);
-
-                        if (HuffmanskyLes.ContainsKey(novy.Freq))
-                        {
-                            HuffmanskyLes[novy.Freq].Add(novy);
-                        }
-                        else HuffmanskyLes.Add(novy.Freq, new List<Node>() { novy });
-
-                        ZbyvaZpracovat--;
-                    }
-                    if (seznam.Count % 2 == 0)
-                    {
-                        lichy = seznam[seznam.Count - 1];
-                    }
-                    else lichy = null;
-                }
-                HuffmanskyLes.Remove(rank);
+                Node u = GetAndDelNextNode(HuffmanskyLes);
+                Node v = GetAndDelNextNode(HuffmanskyLes);
+                Node father = CreateFather(u, v);
+                AppendToDict(HuffmanskyLes, father);
+                ZbyvaZpracovat--;
             }
             return HuffmanskyLes[HuffmanskyLes.Keys.ElementAt(0)][0];
         }
 
-        // public Node GetAndDelNextNode(SortedDictionary<int, List<Node>> freqToNodes)
-        // {
+        private void AppendToDict(SortedDictionary<int, List<Node>> freqToNodes, Node u)
+        {
+            if (!freqToNodes.ContainsKey(u.Freq))
+            {
+                freqToNodes.Add(u.Freq, new List<Node>());
+            }
+            freqToNodes[u.Freq].Add(u);
+        }
 
-        // }
+        private Node GetAndDelNextNode(SortedDictionary<int, List<Node>> freqToNodes)
+        {
+            int lowestFreq = freqToNodes.Keys.First();
+            Node next = freqToNodes[lowestFreq].First();
+            freqToNodes[lowestFreq].Remove(next);
+            if (freqToNodes[lowestFreq].Count == 0) {
+                freqToNodes.Remove(lowestFreq);
+            }
+            return next;
+        }
+
+        private Node CreateFather(Node u, Node v)
+        {
+            Node left = u.WillBeOnLeft(v) ? u : v;
+            Node right = u.WillBeOnLeft(v) ? v : u;
+            int newFreq = u.Freq + v.Freq;
+            byte symbol = left.Freq == right.Freq ? u.Symbol : left.Symbol;
+            return NodeCreator.CreateNode(left, right, newFreq, symbol);
+        }
        
         public void VypisStrom()
         {
