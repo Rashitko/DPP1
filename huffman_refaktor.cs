@@ -109,9 +109,23 @@ namespace HuffmanskeKapky
     {
         private Node root;
 
+
         public HuffmanTree(SortedDictionary<int, List<Node>> freqToNodes)
         {
             root = BuildHuffmanTree(freqToNodes);
+        }
+
+        public static SortedDictionary<int, List<Node>> CreateFreqToNodesFromNodes(Node[] nodes)
+        {
+            SortedDictionary<int, List<Node>> freqToNodes = new SortedDictionary<int, List<Node>>();
+            for (int i = 0; i < nodes.Length; i++)
+            {
+                if (nodes[i]!= null)
+                {
+                    HuffmanTree.AppendToDict(freqToNodes, nodes[i]);
+                }
+            }
+            return freqToNodes;
         }
 
         private Node BuildHuffmanTree(SortedDictionary<int, List<Node>> freqToNodes)
@@ -128,7 +142,7 @@ namespace HuffmanskeKapky
             return freqToNodes[freqToNodes.Keys.ElementAt(0)][0];
         }
 
-        private void AppendToDict(SortedDictionary<int, List<Node>> freqToNodes, Node u)
+        public static void AppendToDict(SortedDictionary<int, List<Node>> freqToNodes, Node u)
         {
             if (!freqToNodes.ContainsKey(u.Freq))
             {
@@ -190,8 +204,10 @@ namespace HuffmanskeKapky
     class FileReader
     {
         private static FileStream inputStream;
+        private const int NODES_SIZE = 256;
+        private const int BUFFER_SIZE = 16384;
 
-        public static bool OpenFile(string fileName)
+        private static bool OpenFile(string fileName)
         {
             try
             {
@@ -208,78 +224,44 @@ namespace HuffmanskeKapky
             return true;
         }
 
-        public static SortedDictionary<int, List<Node>> ReadFile(string fileName)
+        public static SortedDictionary<int, List<Node>> GetFreqToNodesFromFile(string fileName)
         {
-
             if (!(OpenFile(fileName))) 
             {
                 return null;
             }
-            const int NODES_SIZE = 256;
-            const int BUFFER_SIZE = 16384;
-            SortedDictionary<int, List<Node>> freqToNodes = new SortedDictionary<int, List<Node>>();
-            byte readByte;
-         
-            Node[] nodes = new Node[NODES_SIZE];
-            byte[] buffer = new byte[BUFFER_SIZE];
+            
+            Node[] nodes = readNodesFromFile(fileName);
+            return HuffmanTree.CreateFreqToNodesFromNodes(nodes);
+        }
 
-            for (int i = 0; i < inputStream.Length / BUFFER_SIZE; i++)
+        private static Node[] readNodesFromFile(string fileName)
+        {
+            byte[] rawBytes = File.ReadAllBytes(fileName);
+            Node[] result = new Node[NODES_SIZE];
+            foreach (byte readByte in rawBytes)
             {
-                inputStream.Read(buffer, 0, BUFFER_SIZE);
+                AppendByteToNodes(readByte, result);
+            }
+            return result;
+        }
 
-                for (int j = 0; j < BUFFER_SIZE; j++)
-                {
-                    readByte = buffer[j];
-                    if (nodes[readByte] == null)
-                    {
-                        nodes[readByte] = NodeCreator.CreateNode(null, null, 1, (byte)readByte);
-                    }
-                    else
-                    {
-                        nodes[readByte].Freq++;
-                    }
-                }
-            }
-
-            for (int i = 0; i < inputStream.Length % BUFFER_SIZE; i++)
+        private static void AppendByteToNodes(byte readByte, Node[] nodes)
+        {
+            if (nodes[readByte] == null)
             {
-                readByte =(byte) inputStream.ReadByte();
-                if (nodes[readByte] == null)
-                {
-                    nodes[readByte] = NodeCreator.CreateNode(null, null, 1, (byte)readByte);
-                    //   freqToNodes.Add(nodes[readByte]);
-                }
-                else
-                {
-                    nodes[readByte].Freq++;
-                }
+                nodes[readByte] = NodeCreator.CreateNode(null, null, 1, (byte)readByte);
             }
-
-            for (int i = 0; i < NODES_SIZE; i++)
+           else
             {
-                if (nodes[i]!= null)
-                {
-                    if (freqToNodes.ContainsKey(nodes[i].Freq))
-                    {
-                        freqToNodes[nodes[i].Freq].Add(nodes[i]);
-                }
-                else freqToNodes.Add(nodes[i].Freq, new List<Node>() { nodes[i] });
-                }
+                nodes[readByte].Freq++;
             }
-            foreach (KeyValuePair<int,List<Node>> item in freqToNodes)
-            {
-                item.Value.Sort();
-            }
-            return freqToNodes;
         }
 
     }
 
     class Program
     {
-        static SortedDictionary<int, List<Node>> freqToNodes;
-        static HuffmanTree Huffman;
-
         static void Main(string[] args)
         {
 
@@ -288,14 +270,15 @@ namespace HuffmanskeKapky
                 Console.Write("Argument Error");
                 Environment.Exit(0);
             }
-            freqToNodes = FileReader.ReadFile(args[0]);
-
-
-            if ((freqToNodes != null) && (freqToNodes.Count != 0))
+            string fileName = args[0];
+            SortedDictionary<int, List<Node>> freqToNodes = FileReader.GetFreqToNodesFromFile(fileName);
+            bool freqToNodesOk = (freqToNodes != null) && (freqToNodes.Count != 0);
+            if (freqToNodesOk)
             {
-                Huffman = new HuffmanTree(freqToNodes);
-                Huffman.PrintTree();
-                Console.Write("\n");
+                const string NEW_LINE = "\n";
+                HuffmanTree huffmanTree = new HuffmanTree(freqToNodes);
+                huffmanTree.PrintTree();
+                Console.Write(NEW_LINE);
             }
 
         }
