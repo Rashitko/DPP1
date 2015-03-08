@@ -198,14 +198,12 @@ namespace HuffmanskeKapky
                 inputStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
                 if (!(inputStream.CanRead))
                 {
-                    throw new Exception();
+                    throw new IOException();
                 }
             }
-            catch (Exception)
+            catch (IOException)
             {
-                Console.Write("File Error");
-                Environment.Exit(0);
-                //    return false;
+                   return false;
             }
             return true;
         }
@@ -217,23 +215,24 @@ namespace HuffmanskeKapky
             {
                 return null;
             }
+            const int NODES_SIZE = 256;
+            const int BUFFER_SIZE = 16384;
             SortedDictionary<int, List<Node>> freqToNodes = new SortedDictionary<int, List<Node>>();
-            byte readByte = 0;
+            byte readByte;
          
-            Node[] nodes = new Node[256];
-            byte[] buffer = new byte[0x4000];
+            Node[] nodes = new Node[NODES_SIZE];
+            byte[] buffer = new byte[BUFFER_SIZE];
 
-            for (int i = 0; i < inputStream.Length / 0x4000; i++)
+            for (int i = 0; i < inputStream.Length / BUFFER_SIZE; i++)
             {
-                inputStream.Read(buffer, 0, 16384);
+                inputStream.Read(buffer, 0, BUFFER_SIZE);
 
-                for (int j = 0; j < 16384; j++)
+                for (int j = 0; j < BUFFER_SIZE; j++)
                 {
                     readByte = buffer[j];
                     if (nodes[readByte] == null)
                     {
                         nodes[readByte] = NodeCreator.CreateNode(null, null, 1, (byte)readByte);
-                        //   freqToNodes.Add(nodes[readByte]);
                     }
                     else
                     {
@@ -242,7 +241,7 @@ namespace HuffmanskeKapky
                 }
             }
 
-            for (int i = 0; i < inputStream.Length % 0x4000; i++)
+            for (int i = 0; i < inputStream.Length % BUFFER_SIZE; i++)
             {
                 readByte =(byte) inputStream.ReadByte();
                 if (nodes[readByte] == null)
@@ -256,7 +255,7 @@ namespace HuffmanskeKapky
                 }
             }
 
-            for (int i = 0; i < 256; i++)
+            for (int i = 0; i < NODES_SIZE; i++)
             {
                 if (nodes[i]!= null)
                 {
