@@ -187,16 +187,16 @@ namespace HuffmanskeKapky
         }
     }
 
-    class Nacitacka
+    class FileReader
     {
-        private static FileStream vstup;
+        private static FileStream inputStream;
 
-        public static bool OtevrSoubor(string nazev)
+        public static bool OpenFile(string fileName)
         {
             try
             {
-                vstup = new FileStream(nazev, FileMode.Open, FileAccess.Read);
-                if (!(vstup.CanRead))
+                inputStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
+                if (!(inputStream.CanRead))
                 {
                     throw new Exception();
                 }
@@ -210,75 +210,75 @@ namespace HuffmanskeKapky
             return true;
         }
 
-        public static SortedDictionary<int, List<Node>> PrectiSoubor(string nazev)
+        public static SortedDictionary<int, List<Node>> ReadFile(string fileName)
         {
 
-            if (!(OtevrSoubor(nazev))) return null;
-            else
+            if (!(OpenFile(fileName))) 
             {
-                SortedDictionary<int, List<Node>> Nodey = new SortedDictionary<int, List<Node>>();
-                byte a = 0;
-             
-                Node[] prvky = new Node[256];
-                byte[] bafr = new byte[0x4000];
+                return null;
+            }
+            SortedDictionary<int, List<Node>> freqToNodes = new SortedDictionary<int, List<Node>>();
+            byte readByte = 0;
+         
+            Node[] nodes = new Node[256];
+            byte[] buffer = new byte[0x4000];
 
-                for (int i = 0; i < vstup.Length / 0x4000; i++)
+            for (int i = 0; i < inputStream.Length / 0x4000; i++)
+            {
+                inputStream.Read(buffer, 0, 16384);
+
+                for (int j = 0; j < 16384; j++)
                 {
-                    vstup.Read(bafr, 0, 16384);
-
-                    for (int j = 0; j < 16384; j++)
+                    readByte = buffer[j];
+                    if (nodes[readByte] == null)
                     {
-                        a = bafr[j];
-                        if (prvky[a] == null)
-                        {
-                            prvky[a] = NodeCreator.CreateNode(null, null, 1, (byte)a);
-                            //   Nodey.Add(prvky[a]);
-                        }
-                        else
-                        {
-                            prvky[a].Freq++;
-                        }
-                    }
-                }
-
-                for (int i = 0; i < vstup.Length % 0x4000; i++)
-                {
-                    a =(byte) vstup.ReadByte();
-                    if (prvky[a] == null)
-                    {
-                        prvky[a] = NodeCreator.CreateNode(null, null, 1, (byte)a);
-                        //   Nodey.Add(prvky[a]);
+                        nodes[readByte] = NodeCreator.CreateNode(null, null, 1, (byte)readByte);
+                        //   freqToNodes.Add(nodes[readByte]);
                     }
                     else
                     {
-                        prvky[a].Freq++;
+                        nodes[readByte].Freq++;
                     }
                 }
-
-                for (int i = 0; i < 256; i++)
-                {
-                    if (prvky[i]!= null)
-	                {
-                        if (Nodey.ContainsKey(prvky[i].Freq))
-                        {
-                            Nodey[prvky[i].Freq].Add(prvky[i]);
-                    }
-                    else Nodey.Add(prvky[i].Freq, new List<Node>() { prvky[i] });
-                    }
-                }
-                foreach (KeyValuePair<int,List<Node>> item in Nodey)
-                {
-                    item.Value.Sort();
-                }
-                return Nodey;
             }
+
+            for (int i = 0; i < inputStream.Length % 0x4000; i++)
+            {
+                readByte =(byte) inputStream.ReadByte();
+                if (nodes[readByte] == null)
+                {
+                    nodes[readByte] = NodeCreator.CreateNode(null, null, 1, (byte)readByte);
+                    //   freqToNodes.Add(nodes[readByte]);
+                }
+                else
+                {
+                    nodes[readByte].Freq++;
+                }
+            }
+
+            for (int i = 0; i < 256; i++)
+            {
+                if (nodes[i]!= null)
+                {
+                    if (freqToNodes.ContainsKey(nodes[i].Freq))
+                    {
+                        freqToNodes[nodes[i].Freq].Add(nodes[i]);
+                }
+                else freqToNodes.Add(nodes[i].Freq, new List<Node>() { nodes[i] });
+                }
+            }
+            foreach (KeyValuePair<int,List<Node>> item in freqToNodes)
+            {
+                item.Value.Sort();
+            }
+            return freqToNodes;
         }
 
     }
 
     class Program
     {
-        static SortedDictionary<int, List<Node>> Nodey;
+        static SortedDictionary<int, List<Node>> freqToNodes;
         static HuffmanTree Huffman;
 
         static void Main(string[] args)
@@ -289,12 +289,12 @@ namespace HuffmanskeKapky
                 Console.Write("Argument Error");
                 Environment.Exit(0);
             }
-            Nodey = Nacitacka.PrectiSoubor(args[0]);
+            freqToNodes = FileReader.ReadFile(args[0]);
 
 
-            if ((Nodey != null) && (Nodey.Count != 0))
+            if ((freqToNodes != null) && (freqToNodes.Count != 0))
             {
-                Huffman = new HuffmanTree(Nodey);
+                Huffman = new HuffmanTree(freqToNodes);
                 Huffman.PrintTree();
                 Console.Write("\n");
             }
