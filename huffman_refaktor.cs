@@ -203,39 +203,36 @@ namespace HuffmanskeKapky
 
     class FileReader
     {
-        private static FileStream inputStream;
         private const int NODES_SIZE = 256;
         private const int BUFFER_SIZE = 16384;
 
-        private static bool OpenFile(string fileName)
+        private static bool IsFileReadable(string fileName)
         {
-            try
+            using (FileStream stream = new FileStream(fileName, FileMode.Open)) 
             {
-                inputStream = new FileStream(fileName, FileMode.Open, FileAccess.Read);
-                if (!(inputStream.CanRead))
+                try 
                 {
-                    throw new IOException();
+                    return stream.CanRead;
+                }
+                catch 
+                { 
+                    return false; 
                 }
             }
-            catch (IOException)
-            {
-                   return false;
-            }
-            return true;
         }
 
         public static SortedDictionary<int, List<Node>> GetFreqToNodesFromFile(string fileName)
         {
-            if (!(OpenFile(fileName))) 
+            if (!IsFileReadable(fileName)) 
             {
                 return null;
             }
             
-            Node[] nodes = readNodesFromFile(fileName);
+            Node[] nodes = ReadNodesFromFile(fileName);
             return HuffmanTree.CreateFreqToNodesFromNodes(nodes);
         }
 
-        private static Node[] readNodesFromFile(string fileName)
+        private static Node[] ReadNodesFromFile(string fileName)
         {
             byte[] rawBytes = File.ReadAllBytes(fileName);
             Node[] result = new Node[NODES_SIZE];
