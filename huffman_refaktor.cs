@@ -208,16 +208,16 @@ namespace HuffmanskeKapky
 
         private static bool IsFileReadable(string fileName)
         {
-            using (FileStream stream = new FileStream(fileName, FileMode.Open)) 
-            {
-                try 
+            try 
+                {
+                using (FileStream stream = new FileStream(fileName, FileMode.Open)) 
                 {
                     return stream.CanRead;
                 }
-                catch 
-                { 
-                    return false; 
-                }
+            }
+            catch 
+            { 
+                return false; 
             }
         }
 
@@ -225,6 +225,7 @@ namespace HuffmanskeKapky
         {
             if (!IsFileReadable(fileName)) 
             {
+                Console.Write("File Error");
                 return null;
             }
             
