@@ -36,7 +36,7 @@ namespace HuffmanskeKapky
         }
 
         /// <summary>
-        /// Kdyz nema jedineho syna vraci true.
+        /// Kdyz nema jedineho syna vraci true
         /// </summary>
         /// <returns></returns>
         public bool IsLeaf()
@@ -45,10 +45,10 @@ namespace HuffmanskeKapky
         }
 
         /// <summary>
-        /// True o sobe Node rekne jestli bude v Huffmanskem strome nalevo od druheho Nodeu.
+        /// Check if node will be on the left of the provided node 
         /// </summary>
-        /// <param name="druhy"></param>
-        /// <returns></returns>
+        /// <param name="that">Provided node</param>
+        /// <returns>True if this node is on the left</returns>
         public bool WillBeOnLeft(Node that)
         {
             if (that.Freq != this.Freq)
@@ -71,6 +71,8 @@ namespace HuffmanskeKapky
             return that.SeqNum > this.SeqNum;
         }
 
+        /// <summary>Creates string representation of path to node and node itself</summary>
+        /// <returns>String representation of path to node and node itself</returns>
         public override string ToString()
         {
             const string CONTROL_SYMBOL_FORMAT = " [{0}:{1}]\n";
@@ -109,15 +111,35 @@ namespace HuffmanskeKapky
     {
         private Node root;
 
+        ///<summary>Creates Huffman tree from provided dictionary. Dictionary must not be empty</summary>
         public HuffmanTree(SortedDictionary<int, List<Node>> freqToNodes)
         {
             root = BuildHuffmanTree(freqToNodes);
         }
 
+        /// <summary>Creates SortedDictionary where key is frequency and value is the list of nodes with frequencies equal to key</summary>
+        /// <param name="nodes">Array of nodes</param>
+        /// <returns>SortedDictionary where key is frequency and value is the list of nodes</returns>
+        public static SortedDictionary<int, List<Node>> CreateFreqToNodesFromNodes(Node[] nodes)
+        {
+            SortedDictionary<int, List<Node>> freqToNodes = new SortedDictionary<int, List<Node>>();
+            for (int i = 0; i < nodes.Length; i++)
+            {
+                if (nodes[i]!= null)
+                {
+                    HuffmanTree.AppendToDict(freqToNodes, nodes[i]);
+                }
+            }
+            return freqToNodes;
+        }
+
+        ///<summary>Creates Huffman tree from provided SortedDictionary where key is frequency and value is the list of nodes</summary>
+        ///<param name="freqToNodes">SortedDictionary where key is frequency and value is the list of nodes</param>
+        ///<returns>Root of the created tree</returns>
         private Node BuildHuffmanTree(SortedDictionary<int, List<Node>> freqToNodes)
         {
             int leftNodes = freqToNodes.Sum(item => item.Value.Count);
-            while (leftNodes != 1)
+            while (leftNodes > 1)
             {
                 Node u = GetAndDelNextNode(freqToNodes);
                 Node v = GetAndDelNextNode(freqToNodes);
@@ -128,7 +150,10 @@ namespace HuffmanskeKapky
             return freqToNodes[freqToNodes.Keys.ElementAt(0)][0];
         }
 
-        private void AppendToDict(SortedDictionary<int, List<Node>> freqToNodes, Node u)
+        ///<summary>Appends provided node to dictionary</summary>
+        ///<param name="freqToNodes">Dictionary where the node should be inserted</param>
+        ///<param name="u">Node to be inserted</param>
+        public static void AppendToDict(SortedDictionary<int, List<Node>> freqToNodes, Node u)
         {
             if (!freqToNodes.ContainsKey(u.Freq))
             {
@@ -137,6 +162,9 @@ namespace HuffmanskeKapky
             freqToNodes[u.Freq].Add(u);
         }
 
+        ///<summary>Extractes node with the lowest frequency from the dictionary</summary>
+        ///<param name="freqToNodes">Dictionary from which the node should be extracted</param>
+        ///<returns>Extracted node with the lowest frequency</returns>
         private Node GetAndDelNextNode(SortedDictionary<int, List<Node>> freqToNodes)
         {
             int lowestFreq = freqToNodes.Keys.First();
@@ -148,6 +176,10 @@ namespace HuffmanskeKapky
             return next;
         }
 
+        ///<summary>Creates father of two nodes, whose frequency is equal to sum of the frequencies of his sons</summary>
+        ///<param name="u">Node</param>
+        ///<param name="v">Node</param>
+        ///<returns>Created father</returns>
         private Node CreateFather(Node u, Node v)
         {
             Node left = u.WillBeOnLeft(v) ? u : v;
@@ -157,11 +189,15 @@ namespace HuffmanskeKapky
             return NodeCreator.CreateNode(left, right, newFreq, symbol);
         }
        
+        ///<summary>Prints Huffman tree</summary>
         public void PrintTree()
         {
             PrintTreeWithPrefix(root, "");
         }
         
+        ///<summary>Prints Huffman tree with root in provided node with provided prefix</summary>
+        ///<param name="u">Root from which to start</params>
+        ///<param name="prefix">Prefix</params>
         private void PrintTreeWithPrefix(Node u, string prefix)
         {
             if (u.IsLeaf()) {
@@ -187,90 +223,64 @@ namespace HuffmanskeKapky
         }
     }
 
-    class Nacitacka
+    class FileReader
     {
-        private static FileStream vstup;
+        private const int NODES_SIZE = 256;
+        private const int BUFFER_SIZE = 16384;
 
-        public static bool OtevrSoubor(string nazev)
+        ///<summary>Checks if the file with provided name can be read</summary>
+        ///<param name="fileName">File name</params>
+        ///<returns>True if the file can be read</returns>
+        public static bool IsFileReadable(string fileName)
         {
-            try
-            {
-                vstup = new FileStream(nazev, FileMode.Open, FileAccess.Read);
-                if (!(vstup.CanRead))
+            try 
                 {
-                    throw new Exception();
+                using (FileStream stream = new FileStream(fileName, FileMode.Open)) 
+                {
+                    return stream.CanRead;
                 }
             }
-            catch (Exception)
-            {
-                Console.Write("File Error");
-                Environment.Exit(0);
-                //    return false;
+            catch 
+            { 
+                return false; 
             }
-            return true;
         }
 
-        public static SortedDictionary<int, List<Node>> PrectiSoubor(string nazev)
+        ///<summary>Creates dictionary based on content of file. File must be readable</summary>
+        ///<param name="fileName">File name</params>
+        ///<returns>SortedDictionary where key is frequency and value is the list of nodes</returns>
+        public static SortedDictionary<int, List<Node>> GetFreqToNodesFromFile(string fileName)
         {
+            Node[] nodes = ReadNodesFromFile(fileName);
+            return HuffmanTree.CreateFreqToNodesFromNodes(nodes);
+        }
 
-            if (!(OtevrSoubor(nazev))) return null;
-            else
+        ///<summary>Create nodes array from file. File must be readable</summary>
+        ///<param name="fileName">File name</params>
+        ///<returns>Loaded array of nodes</returns>
+        private static Node[] ReadNodesFromFile(string fileName)
+        {
+            byte[] rawBytes = File.ReadAllBytes(fileName);
+            Node[] nodes = new Node[NODES_SIZE];
+            foreach (byte readByte in rawBytes)
             {
-                SortedDictionary<int, List<Node>> Nodey = new SortedDictionary<int, List<Node>>();
-                byte a = 0;
-             
-                Node[] prvky = new Node[256];
-                byte[] bafr = new byte[0x4000];
+                AppendByteToNodes(readByte, nodes);
+            }
+            return nodes;
+        }
 
-                for (int i = 0; i < vstup.Length / 0x4000; i++)
-                {
-                    vstup.Read(bafr, 0, 16384);
-
-                    for (int j = 0; j < 16384; j++)
-                    {
-                        a = bafr[j];
-                        if (prvky[a] == null)
-                        {
-                            prvky[a] = NodeCreator.CreateNode(null, null, 1, (byte)a);
-                            //   Nodey.Add(prvky[a]);
-                        }
-                        else
-                        {
-                            prvky[a].Freq++;
-                        }
-                    }
-                }
-
-                for (int i = 0; i < vstup.Length % 0x4000; i++)
-                {
-                    a =(byte) vstup.ReadByte();
-                    if (prvky[a] == null)
-                    {
-                        prvky[a] = NodeCreator.CreateNode(null, null, 1, (byte)a);
-                        //   Nodey.Add(prvky[a]);
-                    }
-                    else
-                    {
-                        prvky[a].Freq++;
-                    }
-                }
-
-                for (int i = 0; i < 256; i++)
-                {
-                    if (prvky[i]!= null)
-	                {
-                        if (Nodey.ContainsKey(prvky[i].Freq))
-                        {
-                            Nodey[prvky[i].Freq].Add(prvky[i]);
-                    }
-                    else Nodey.Add(prvky[i].Freq, new List<Node>() { prvky[i] });
-                    }
-                }
-                foreach (KeyValuePair<int,List<Node>> item in Nodey)
-                {
-                    item.Value.Sort();
-                }
-                return Nodey;
+        ///<summary>If node with given symbol does not exist new one is created, otherwise frequency of existing node is incremeted</summary>
+        ///<param name="symbol">Symbol</params>
+        ///<param name="nodes">Nodes</params>
+        private static void AppendByteToNodes(byte symbol, Node[] nodes)
+        {
+            if (nodes[symbol] == null)
+            {
+                nodes[symbol] = NodeCreator.CreateNode(null, null, 1, (byte)symbol);
+            }
+           else
+            {
+                nodes[symbol].Freq++;
             }
         }
 
@@ -278,9 +288,6 @@ namespace HuffmanskeKapky
 
     class Program
     {
-        static SortedDictionary<int, List<Node>> Nodey;
-        static HuffmanTree Huffman;
-
         static void Main(string[] args)
         {
 
@@ -289,14 +296,20 @@ namespace HuffmanskeKapky
                 Console.Write("Argument Error");
                 Environment.Exit(0);
             }
-            Nodey = Nacitacka.PrectiSoubor(args[0]);
-
-
-            if ((Nodey != null) && (Nodey.Count != 0))
+            string fileName = args[0];
+            if (!FileReader.IsFileReadable(fileName)) 
             {
-                Huffman = new HuffmanTree(Nodey);
-                Huffman.PrintTree();
-                Console.Write("\n");
+                Console.Write("File Error");
+                Environment.Exit(0);
+            }
+            SortedDictionary<int, List<Node>> freqToNodes = FileReader.GetFreqToNodesFromFile(fileName);
+            bool freqToNodesNotEmpty = (freqToNodes != null) && (freqToNodes.Count != 0);
+            if (freqToNodesNotEmpty)
+            {
+                const string NEW_LINE = "\n";
+                HuffmanTree huffmanTree = new HuffmanTree(freqToNodes);
+                huffmanTree.PrintTree();
+                Console.Write(NEW_LINE);
             }
 
         }

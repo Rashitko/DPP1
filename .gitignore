@@ -1,4 +1,5 @@
 refactor_output*
 original_output*
+diff_*
 input.txt
 *.exe
