@@ -1,0 +1,70 @@
+[K celemu kodu]
+Z duvodu konzistence jsme zmenily mala pocatecni pismena ve nazvu trid na velka. Veskere ceske nazvy jsme prelozili do anglickeho jazyka a zmenily nazvy metod a promenych tak aby lepe odpovidali resenemu problemu a byly vice nazorne. Ke vsem metodam jsme doplnili komentare a zmenili ceske komentare take na anglicke.
+
+[Trida vrchol, pocet jiz vytvorenych vrcholu]
+Ve tride vrchol je citac jiz vytvorenych vrcholu. Tuto funkcionalitu jsme presunuli do tridy NodeCreator, ktera ma toto pocitani na starosti. Je podle nas spatny navrh aby jsi trida vrchol sama o sobe pamatovala poradi. Soucasne jsme ve tride NodeCreator vytvorili metodu pro vytvoreni listu, ktera prebira pouze znak a zbyle parametry voli. V puvodnim kodu se totiz list vytvarel za pouziti puvodniho konstruktoru tridy vrchol, kde byli 3 parametry vzdy pevne nastavene.
+
+[Trida vrchol, metoda jeList]
+If-else vetev zamemena rovnou za return nasledovanym vyrazem, co zajistuje stejnou funkcionalitu.
+
+[Trida vrchol, metoda sectiVahy]
+Odstranena, nepouzivala se.
+
+[Trida vrchol, metoda ZvecVahu]
+Odstranena, nepouzivala se.
+
+[Trida vrchol, metoda BudeVrcholVlevo]
+Parametr byl prejmenovan na that. I kdyz to neni nutne, pred vlastnostmi patricimu vrcholu reprezentovaneho timto objektem (this), jsme vzdy pridali this. aby bylo jasne videt co se s cim porovnava. If-else vetve byly nahrazeny pouze jednoduchymi podminkami ( else vetve jsou zbytecne, jelikoz volam return). Snazili jsme se celkove popsat kod tak, aby lepe popisoval logiku veci a zjednodusili jsme nektere logicke vyrazy pomoci demorganovych zakonu.
+
+[Trida vrchol, metoda ToString]
+Metoda pridana. Tato metoda vraci retezec reprezentujici vrchol. Tato metoda nahradila kod v metode, ktera tiska cely strom. Toto je podle nas metoda patricici samotnemu vrcholi. Zavedli jsme konstanty pro pouzivane stringy. Nahradili jsme kod testujici zda je znak tisknutelny metodou char.IsChar
+
+[Trida strom, vlastnost pocetStromu]
+odstrena, neni potrba
+
+[Trida strom, metoda CreateFreqTonodesToNodes]
+Pridana staticka metoda. V puvodnim kodu v casti se venovajici se nacteni vrcholu se podobny kod vyskytoval a prislo nam ze by mel byt zastresen pod touto tridou.
+
+[Trida strom, metoda postavStrom]
+Metoda kompletne prepsana se zachovanim logiky veci, kterou autor sam nejspise zamyslel. Autor vzdy vybira dva vrcholy s nejmensi vahou ( v nasem pojmenovani frekvenci), vytvori pro ne spolecneho otce s novou vahou a prida otce zpet do seznamu vrcholu. 
+
+Vrcholy pro ktere je vytvoren otec ze seznamu mazeme, coz umoznilo kompletne zjednodusit cely kod a odstranit duplicity ve forme trech velmi podobnych smycek. Take nam prijde, ze by programator mel po sobe uklizet data, ktera uz nepotrebuje. Programator vracel prvni prvek seznamu pomoci ElementAt[0], da se ale namisto pouzit nazornejsi metoda First. 
+
+Celou tuto metodu jsme rozdelili na nekolik samostatnych metod.
+
+[Trida strom, metoda AppendToDict]
+Pridana metoda. Nahrazuje kod pouzivany opakovane v metode postavStrom. Metoda pridava vrchol do slovniku s jich existujicimi vrcholy.
+
+[Trida strom, metoda GetAndDelNextNode]
+Pridana metoda. Nahrazuje kod pouzivany opakovane v metode postavStrom. Metoda ziska a smaze vrchol s nejmensi vahou ve slovniku.
+ 
+[Trida strom, metoda CreateFather]
+Pridana metoda. Nahrazuje kod pouzivany opakovane v metode postavStrom. Metoda vytvori otce pro dva zadane vrcholy. V metode postavStrom se otci se syny s ruznou vahou prirazuje jiny symbol nez pri beznem chovani a toto rozhodnuti je zde take implementovane. Tato zmena umoznila temer vyhodit jeden zbytecni for cyklus.
+
+[Trida strom, metoda VypisStrom]
+Smazana, nic nedela, je v ni jen zakomentovany kod
+
+[Trida strom, metoda VypisStrom2]
+Odstranena promenna bylVlevo odpovidajici podminky (tela podminek ponechany )obsahujici tuto promenou, jelikoz ty byly vzdy vyhodnocene pravdive. Tato metoda je rekurzivni a tedy prvne testujeme zda nenastal konec rekurze ( vrchol je list a vola se metoda na vrcholu toString). V kodu jsme zavedli konstanty pro format vystupu pro pouzivane stringy.
+
+
+[Trida Nacitacka, konstanty pro velikost bufferu]
+Hodnoty byly pouzivany primo v kodu. Vytvorili jsme pro ne konstatny a prevedli obe do desitkove soustavy.
+
+[Trida Nacitacka, metoda otevriSoubor]
+Metoda smazana a funkcionalita rozdelena do metod IsFileReadable a GetFreqToNodesFromFile.
+
+[Trida Nacitacka, metoda GetFreqToNodesFromFile]
+Metoda pridana. Kod ktery se vyskytoval, pri nacitani dat ze souboru a mel by podle nas byt volan ve vlastni metode.
+
+[Trida Nacitacka, metoda ReadNodesFromFile]
+Metoda pridana. Tato metoda nahrazuje duplicitni kod zajistujici nacitani vrcholu ze souboru za pomoci vice cyklu a je velice zjednodusena.
+
+[Trida Nacitacka, metoda AppendLeafToNodesList]
+Metoda pridana. Uzavira do metody kod opakovane se vysktytujici v metode otevriSoubor. Pridava vrhol do seznamu vrcholu.
+
+
+[Trida Program, metoda main]
+Smazany komentare obsahujici kod. Metodu precti soubor jsme odstranili a nahradili volanim metody, ktera prvne testuje, zda lze soubour otevrit. Pote volame metodu tridy Nacitacka GetFreqToNodesFromFile, ktera nacte data ze souboru a vytvori pro ne odpovidajici datovou strukturu, coz predtim delala i metoda prectiSoubor.
+
+
