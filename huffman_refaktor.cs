@@ -5,7 +5,7 @@ using System.Text;
 using System.IO;
 using System.Diagnostics;
 
-namespace HuffmanskeKapky
+namespace HuffmanCoding
 {
 
     class NodeCreator
@@ -150,7 +150,7 @@ namespace HuffmanskeKapky
                 AppendToDict(freqToNodes, father);
                 leftNodes--;
             }
-            return freqToNodes[freqToNodes.Keys.ElementAt(0)][0];
+            return freqToNodes[freqToNodes.Keys.First()][0];
         }
 
         ///<summary>Appends provided node to dictionary</summary>
