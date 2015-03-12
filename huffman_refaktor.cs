@@ -150,7 +150,7 @@ namespace HuffmanCoding
                 AppendToDict(freqToNodes, father);
                 leftNodes--;
             }
-            return freqToNodes[freqToNodes.Keys.First()][0];
+            return freqToNodes[freqToNodes.Keys.First()].First();
         }
 
         ///<summary>Appends provided node to dictionary</summary>

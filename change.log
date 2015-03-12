@@ -20,7 +20,7 @@ Parametr byl prejmenovan na that. I kdyz to neni nutne, pred vlastnostmi patrici
 Metoda pridana. Tato metoda vraci retezec reprezentujici vrchol. Tato metoda nahradila kod v metode, ktera tiska cely strom. Toto je podle nas metoda patricici samotnemu vrcholi. Zavedli jsme konstanty pro pouzivane stringy. Nahradili jsme kod testujici zda je znak tisknutelny metodou char.IsChar
 
 [Trida strom, vlastnost pocetStromu]
-odstrena, neni potrba
+odstrena, neni potreba
 
 [Trida strom, metoda CreateFreqToNodes]
 Pridana staticka metoda. V puvodnim kodu v casti se venovajici se nacteni vrcholu se podobny kod vyskytoval a prislo nam ze by mel byt zastresen pod touto tridou.
