@@ -22,7 +22,7 @@ Metoda pridana. Tato metoda vraci retezec reprezentujici vrchol. Tato metoda nah
 [Trida strom, vlastnost pocetStromu]
 odstrena, neni potrba
 
-[Trida strom, metoda CreateFreqTonodesToNodes]
+[Trida strom, metoda CreateFreqToNodes]
 Pridana staticka metoda. V puvodnim kodu v casti se venovajici se nacteni vrcholu se podobny kod vyskytoval a prislo nam ze by mel byt zastresen pod touto tridou.
 
 [Trida strom, metoda postavStrom]
