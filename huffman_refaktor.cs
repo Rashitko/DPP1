@@ -16,6 +16,11 @@ namespace HuffmanskeKapky
             nodesCount++;
             return new Node(nodesCount, left, right, freq, symbol);
         }
+
+        public static Node CreateNode(byte symbol)
+        {
+            return CreateNode(null, null, 1, symbol);
+        }
     }
 
     class Node: IComparable<Node>
@@ -35,10 +40,8 @@ namespace HuffmanskeKapky
             this.Symbol = symbol;
         }
 
-        /// <summary>
-        /// Kdyz nema jedineho syna vraci true
-        /// </summary>
-        /// <returns></returns>
+        /// <summary></summary>
+        /// <returns>True if node is leaf</returns>
         public bool IsLeaf()
         {
             return (Left == null) && (Right == null);
@@ -264,7 +267,7 @@ namespace HuffmanskeKapky
             Node[] nodes = new Node[NODES_SIZE];
             foreach (byte readByte in rawBytes)
             {
-                AppendByteToNodes(readByte, nodes);
+                AppendLeafToNodesList(readByte, nodes);
             }
             return nodes;
         }
@@ -272,11 +275,11 @@ namespace HuffmanskeKapky
         ///<summary>If node with given symbol does not exist new one is created, otherwise frequency of existing node is incremeted</summary>
         ///<param name="symbol">Symbol</params>
         ///<param name="nodes">Nodes</params>
-        private static void AppendByteToNodes(byte symbol, Node[] nodes)
+        private static void AppendLeafToNodesList(byte symbol, Node[] nodes)
         {
             if (nodes[symbol] == null)
             {
-                nodes[symbol] = NodeCreator.CreateNode(null, null, 1, (byte)symbol);
+                nodes[symbol] = NodeCreator.CreateNode((byte)symbol);
             }
            else
             {
